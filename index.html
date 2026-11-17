@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>This is Gallery — Brand Foundation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* 16:9 고정 프레임 — 1600×900 기준으로 그리고 창 크기에 맞춰 통째로 확대/축소 */
+:root{--black:#000;--white:#fff;--line:#cfcfcf;--soft:#f3f3f3;--mute:#a8a8a8;--outside:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Afacad','Apple SD Gothic Neo','Pretendard','Noto Sans KR',system-ui,sans-serif;background:var(--outside);color:var(--black);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+img{-webkit-user-drag:none;pointer-events:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid #000;outline-offset:3px}
+
+.frame{position:absolute;left:50%;top:50%;width:1600px;height:900px;background:var(--white);
+  transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center;overflow:hidden}
+.app{position:absolute;inset:0}
+
+/* ---------- top ---------- */
+.top{position:absolute;left:165px;right:166px;top:97px;z-index:2}
+.bar{background:var(--black);color:var(--white);height:47px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;padding:0 20px}
+.brand{display:flex;align-items:flex-end;gap:12px;white-space:nowrap}
+.brand .logo{height:24px;width:auto;display:block}
+.brand small{font-size:13px;line-height:1;padding-bottom:2px}
+.brand .logo-text{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.bar .title{font-size:26px;font-weight:600;white-space:nowrap}
+.bar .title span{font-weight:400;opacity:.6;margin-left:10px;font-size:19px}
+.credit{font-size:12px;text-align:right;white-space:nowrap}
+
+.banner{background:var(--black);color:var(--white);height:128px;position:relative;
+  display:flex;align-items:stretch;padding:0 0 0 30px}
+.banner .cat{height:134px;width:auto;flex:none;align-self:flex-end;margin-right:20px}
+.banner .txt{flex:1;align-self:center}
+.banner .txt h1{font-size:28px;font-weight:400;line-height:1.15;margin-bottom:5px;letter-spacing:-.01em}
+.banner .txt p{font-size:13px;line-height:1.7}
+.banner .right{position:relative;width:290px;flex:none}
+.banner .right .brand{position:absolute;left:0;top:50%;transform:translateY(-50%);flex-direction:column;align-items:flex-start;gap:8px}
+.banner .right .brand .logo{height:30px}
+.banner .right .brand .logo-text{font-size:32px}
+.banner .right .brand small{font-size:17px;font-weight:500}
+.banner .hen{position:absolute;right:20px;top:3px;height:158px;width:auto;z-index:2}
+
+/* ---------- stage ---------- */
+.stage{position:absolute;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.stage.home{left:165px;right:166px;top:259px;height:495px;overflow:visible}
+.stage.doc{left:0;right:0;top:184px;height:562px;overflow:hidden}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:34px 27px;height:100%}
+.card{position:relative;background:#000;overflow:hidden;display:block;height:100%}
+.card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.card:hover img{transform:scale(1.035)}
+.card .fallback{position:absolute;inset:0;display:none;align-items:flex-end;padding:20px;color:#fff;font-size:18px;text-align:left}
+.card.missing .fallback{display:flex}
+.missing img{visibility:hidden}
+
+.pages{display:flex;flex-direction:column;align-items:center;gap:40px}
+.page{position:relative;width:999px;height:562px;flex:none;border:1px solid var(--line);background:var(--soft);overflow:hidden;scroll-snap-align:start}
+.page img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+.page .missing-msg{position:absolute;inset:0;display:none;place-items:center;color:var(--mute);font-size:16px;text-align:center;padding:20px}
+.page.missing .missing-msg{display:grid}
+.shield{position:absolute;inset:0}
+
+/* glass explanation */
+.glass{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:36px 60px;
+  background:rgba(255,255,255,.28);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);
+  opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s}
+.page.has-note:hover .glass,.page.has-note.show .glass{opacity:1;visibility:visible}
+.glass-in{width:100%;max-width:820px;max-height:100%;overflow-y:auto;
+  background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 10px 40px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.9);
+  border-radius:16px;padding:24px 32px;font-size:15px;line-height:1.7;color:#111;word-break:keep-all}
+.glass-in .ref{font-size:13px;color:#666;margin-bottom:10px}
+.glass-in p+p{margin-top:10px}
+.glass-in ul{list-style:none;margin-top:14px;border-top:1px solid rgba(0,0,0,.12);padding-top:12px}
+.glass-in li+li{margin-top:6px}
+.glass-in a{color:#000;text-decoration:underline;text-underline-offset:3px;word-break:break-all;user-select:text}
+
+/* ---------- bottom nav ---------- */
+.nav{position:absolute;left:165px;right:166px;top:820px;transform:translateY(-50%)}
+.nav-in{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.search{justify-self:start;display:flex;align-items:center;width:259px;height:35px;border:1.6px solid #000;border-radius:999px;padding:0 8px 0 16px}
+.search input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:15px;background:transparent;user-select:text;border-left:1.6px solid #000;padding-left:8px;height:17px}
+.search input::placeholder{color:var(--mute)}
+.search button{width:26px;height:26px;display:grid;place-items:center}
+.search.err{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.ctrls{display:flex;align-items:center;gap:92px}
+.ctrls button{display:grid;place-items:center}
+.ctrls button:disabled{opacity:.22;cursor:default}
+.tools{justify-self:end;display:flex;align-items:center;gap:12px}
+.tocbtn{width:182px;height:35px;border:1.6px solid #000;border-radius:999px;font-size:15px}
+.tocbtn[aria-pressed=true]{background:#000;color:#fff}
+
+
+
+/* slideshow: 모든 페이지가 같은 프레임 안에서 넘어감 */
+.viewport{position:absolute;left:300px;top:0;width:999px;height:562px}
+.slide{position:absolute;inset:0;transition:opacity .35s ease}
+.slide.from-r,.slide.from-l{opacity:0}
+.slide.to-l,.slide.to-r{opacity:0;pointer-events:none}
+.turn{position:absolute;top:50%;width:60px;height:60px;margin-top:-30px;display:grid;place-items:center;border-radius:50%;transition:background .2s,opacity .2s}
+.turn:hover:not(:disabled){background:#f0f0f0}
+.turn:disabled{opacity:.15;cursor:default}
+.turn.prev{left:200px}.turn.next{right:200px}
+
+/* 데모 영상: 디자인 페이지(PNG)의 골드 프레임 안쪽에 영상을 겹쳐 재생 */
+.film-screen{position:absolute;z-index:2;background:#000;overflow:hidden}
+.page img.film-gold{position:absolute;z-index:3;object-fit:fill;background:transparent;pointer-events:none}
+.film-ui{position:absolute;z-index:4;cursor:pointer}
+.film-play{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;
+  display:grid;place-items:center;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:opacity .25s}
+.film-play .i-pause{display:none}
+.film-ui.playing .film-play .i-play{display:none}
+.film-ui.playing .film-play .i-pause{display:inline}
+.film-ui.playing .film-play,.film-ui.playing .film-bar{opacity:0}
+.film-ui.playing:hover .film-play,.film-ui.playing:hover .film-bar{opacity:1}
+.film-bar{position:absolute;left:14%;right:14%;bottom:5%;display:flex;align-items:center;gap:12px;transition:opacity .25s;cursor:default}
+.film-track{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.35);cursor:pointer;position:relative}
+.film-track::before{content:"";position:absolute;inset:-8px 0}
+.film-track i{display:block;height:100%;width:0;border-radius:3px;background:#fff}
+.film-time{color:#fff;font-size:12px;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.film-full{display:grid;place-items:center;width:22px;height:22px}
+.film-bad .film-ui{display:none}
+.film-screen video{width:100%;height:100%;object-fit:cover;display:block}
+.film-err{position:absolute;inset:0;display:none;place-items:center;text-align:center;color:#ddd;font-size:15px;line-height:1.7;padding:20px}
+.film-bad .film-err{display:grid}
+.film-bad video{visibility:hidden}
+
+/* 돋보기 */
+.zoombtn{width:35px;height:35px;border:1.6px solid #000;border-radius:50%;display:grid;place-items:center;color:#000;transition:background .2s,color .2s}
+.zoombtn[aria-pressed=true]{background:#000;color:#fff}
+.zoombtn:disabled{opacity:.22;cursor:default}
+.zoom-on .page{cursor:none}
+.zoom-on .page .glass{display:none}
+.lens{position:absolute;z-index:20;width:240px;height:240px;margin:-120px 0 0 -120px;border-radius:50%;pointer-events:none;
+  background-repeat:no-repeat;background-color:#fff;
+  border:2px solid rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(0,0,0,.25),0 12px 34px rgba(0,0,0,.28);
+  opacity:0;transform:scale(.85);transition:opacity .15s,transform .15s}
+.lens.on{opacity:1;transform:scale(1)}
+.lens span{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:11px;color:#fff;background:rgba(0,0,0,.5);padding:1px 7px;border-radius:9px}
+
+/* 영역별 해설: 마우스 옆 작은 유리 말풍선 */
+.tip{position:absolute;z-index:15;left:0;top:0;max-width:240px;padding:6px 10px;
+  font-size:12px;line-height:1.5;color:#111;word-break:keep-all;
+  background:rgba(255,255,255,.32);-webkit-backdrop-filter:blur(14px) saturate(180%) brightness(1.08);backdrop-filter:blur(14px) saturate(180%) brightness(1.08);
+  border:1px solid rgba(255,255,255,.75);border-radius:10px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85),inset 0 -1px 0 rgba(255,255,255,.25),0 0 0 .5px rgba(0,0,0,.06),0 6px 18px rgba(0,0,0,.10);
+  pointer-events:none;opacity:0;transition:opacity .12s ease}
+.tip.on{opacity:1}
+.tip.link{text-decoration:underline;text-underline-offset:3px}
+.hl{position:absolute;z-index:14;border-radius:5px;pointer-events:none;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 3px rgba(255,255,255,.6);opacity:0;transition:opacity .12s}
+.hl.on{opacity:0}
+.zoom-on .hl{display:none}
+.zoom-on .tip{display:none}
+/* ---------- 스마트폰(세로): 메인은 한 줄 목록, 슬라이드는 가로 안내 ---------- */
+.rotate-msg{display:none;position:fixed;inset:0;z-index:50;background:#fff;color:#000;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:30px}
+.rotate-msg svg{display:block}
+.rotate-msg b{font-size:20px;font-weight:600}
+.rotate-msg span{font-size:14px;color:#666}
+.rotate-msg button{margin-top:8px;height:38px;padding:0 22px;border:1.6px solid #000;border-radius:999px;font-size:15px}
+@media (max-width:700px) and (orientation:portrait){
+  html,body{height:auto;min-height:100%}
+  body{overflow-x:hidden;overflow-y:auto}
+  body[data-view=home] .frame{position:relative;left:auto;top:auto;width:100%;height:auto;transform:none;overflow:visible}
+  body[data-view=home] .app{position:relative;inset:auto}
+  body[data-view=home] .nav{display:none}
+  body[data-view=home] .top{position:static;padding:20px 12px 0}
+  body[data-view=home] .stage.home{position:static;left:auto;right:auto;top:auto;height:auto;padding:16px 12px 40px;overflow:visible}
+  body[data-view=home] .grid{display:flex;flex-direction:column;gap:14px;height:auto}
+  body[data-view=home] .card{height:auto;min-height:110px}
+  body[data-view=home] .card img{height:auto}
+  .banner{height:auto;display:block;padding:18px 16px 0}
+  .banner .txt{align-self:auto}
+  .banner .txt h1{font-size:22px;margin-bottom:6px}
+  .banner .txt p{font-size:12px;line-height:1.6}
+  .banner .cat{position:absolute;left:14px;bottom:0;height:100px;margin:0;z-index:1}
+  .banner .right{width:auto;height:112px;margin-top:6px}
+  .banner .right .brand{left:112px}
+  .banner .right .brand .logo{height:24px}
+  .banner .right .brand .logo-text{font-size:26px}
+  .banner .right .brand small{font-size:14px}
+  .banner .hen{right:8px;top:auto;bottom:0;height:112px}
+  body[data-view=doc]{overflow:hidden}
+  body[data-view=doc] .frame{visibility:hidden}
+  body[data-view=doc] .rotate-msg{display:flex}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{body{display:none!important}}
+</style>
+</head>
+<body>
+<div class="frame" id="frame"><div class="app">
+  <header class="top" id="top"></header>
+  <main class="stage" id="stage"></main>
+  <nav class="nav">
+    <div class="nav-in">
+      <form class="search" id="search" onsubmit="return false">
+        <input id="pageInput" inputmode="numeric" placeholder="Enter the page" aria-label="페이지 번호">
+        <button type="submit" aria-label="페이지로 이동">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+        </button>
+      </form>
+      <div class="ctrls">
+        <button id="backBtn" aria-label="이전 화면으로" title="이전 화면으로" disabled>
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6"><rect x="2.5" y="2.5" width="19" height="19" rx="6"/><path d="M9.5 8.5 7 11l2.5 2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 11h6a3 3 0 0 1 0 6H11" stroke-linecap="round"/></svg>
+        </button>
+        <button id="homeBtn" aria-label="홈">
+          <svg width="46" height="46" viewBox="0 0 30 30" fill="none" stroke="#000" stroke-width="1.8" stroke-linejoin="round"><path d="M5 13.5 15 5l10 8.5V25H18.5v-6.5a3.5 3.5 0 0 0-7 0V25H5z"/></svg>
+        </button>
+        <button id="fwdBtn" aria-label="다음 화면으로" title="다음 화면으로" disabled>
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.6"><rect x="2.5" y="2.5" width="19" height="19" rx="6"/><path d="M14.5 8.5 17 11l-2.5 2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.5 11h-6a3 3 0 0 0 0 6H13" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="tools">
+        <button class="zoombtn" id="zoomBtn" aria-pressed="false" aria-label="돋보기" title="돋보기 (Esc로 끄기)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/><path d="M10.5 7.8v5.4M7.8 10.5h5.4" stroke-width="2"/></svg>
+        </button>
+        <button class="tocbtn" id="tocBtn" aria-pressed="false">Table of Contents</button>
+      </div>
+    </div>
+  </nav>
+</div></div>
+
+<div class="rotate-msg" id="rotateMsg">
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.2" transform="rotate(90 12 12)"/><path d="M20.5 5.5A9.5 9.5 0 0 0 12 2.5"/><path d="M20.5 2.5v3h-3"/></svg>
+  <b>화면을 가로로 돌려주세요</b>
+  <span>Please rotate your phone to view the pages.</span>
+  <button type="button" onclick="document.getElementById('homeBtn').click()">← 처음으로 / Home</button>
+</div>
+
+<script src="regions.js"></script>
+<script>
+/* ===== 설정 ===== */
+const BASE = 'assets/';
+const SECTION_NAMES = ['Brand Story','Wordmark','Positioning','Research','Application','Sources'];
+const FILES = {"1": ["1-1", "1-2(1)", "1-2(2)", "1-2(3)", "1-3(1)", "1-3(2)", "1-4(1)", "1-4(2)", "1-5", "1-6", "1-7", "1-8(1)", "1-8(2)", "1-9", "1-10(1)", "1-10(2)", "1-11", "1-12(1)", "1-12(2)", "1-13(1)", "1-13(2)", "1-13(3)", "1-13(4)", "1-13(5)", "1-13(6)", "1-13(7)", "1-14"], "2": ["2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "2-7", "2-8(1)", "2-8(2)", "2-8(3)", "2-9(1)", "2-9(2)", "2-9(3)", "2-10(1)", "2-10(2)", "2-10(3)", "2-10(4)", "2-10(5)", "2-11(1)", "2-11(2)", "2-12(1)", "2-12(2)", "2-12(3)", "2-13(1)", "2-13(2)", "2-14(1)", "2-14(2)", "2-15(1)", "2-15(2)", "2-15(3)", "2-15(4)", "2-15(5)", "2-16(1)", "2-16(2)", "2-16(3)", "2-16(4)", "2-16(4-1)"], "3": ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "3-7", "3-8", "3-9", "3-10", "3-11", "3-12", "3-13", "3-14", "3-15", "3-16", "3-17", "3-18", "3-19", "3-20", "3-21", "3-22", "3-23", "3-24", "3-25", "3-26(1)", "3-26(2)", "3-27", "3-28", "3-29", "3-30", "3-31", "3-32", "3-33", "3-34", "3-35", "3-36", "3-37", "3-38", "3-39", "3-40", "3-41", "3-42", "3-43", "3-44", "3-45", "3-46", "3-47", "3-48", "3-49", "3-50", "3-51", "3-52", "3-53(1)", "3-53(2)", "3-53(3)"], "4": ["4-1", "4-2", "4-3", "4-4(1)", "4-4(2)", "4-5(1)", "4-5(2)", "4-5(3)", "4-6", "4-7", "4-8(1)", "4-8(2)", "4-9(1)", "4-9(2)", "4-10(1)", "4-10(2)"], "5": ["5-1", "5-2", "5-3(1)", "5-3(2)", "5-4", "5-5(1)", "5-5(2)", "5-5(3)", "5-5(4)", "5-6(1)", "5-6(2)", "5-6(3)", "5-7(1)", "5-7(2)", "5-8(1)", "5-8(2)", "5-9(1)", "5-9(2)", "5-9(3)", "5-9(4)", "5-9(5)", "5-9(6)", "5-9(7)", "5-9(8)", "5-9(9)", "5-9(10)", "5-9(11)", "5-9(12)", "5-9(13-1)", "5-9(13-2)", "5-9(14-1)", "5-9(14-2)"], "6": ["6-1", "6-2", "6-3(1)", "6-3(2)", "6-4(1)", "6-4(2)", "6-5(1)", "6-5(2)"]};
+const TOC = ['toc(1)','toc(2)','toc(3)'];
+const LOGO = BASE + 'main/logo.png';
+/* 데모 영상 설정 -------------------------------------------------
+   FILM_PAGE : 골드 프레임이 그려진 디자인 페이지 파일 이름
+   FILM_BOX  : 그 페이지 안에서 영상이 들어갈 자리 (페이지 크기 대비 %)
+               위치가 조금 어긋나면 이 숫자만 조정하세요. */
+const FILM_PAGE = '5-7(2)';
+const FILM_BOX  = { left: 17.6, top: 23.2, width: 65.0, height: 65.0 };   // 영상 자리
+const GOLD_BOX  = { left: 16.1, top: 20.9, width: 67.8, height: 69.5 };   // 골드 프레임(main/frame.png) 자리
+const GOLD = BASE + 'main/frame.png';
+const FILM_VIDEO = [BASE + 'demo.mp4', BASE + 'demo.mov'];
+const CREDIT = 'SERIM LEE · Dept. of DCD, Myongji Univ. · serim@mju.ac.kr';
+
+/* 전체 페이지 번호 (표지 제외, 섹션1부터 순서대로 01, 02 …) */
+const PAGES = [];
+let n = 1;
+for (let s = 1; s <= 6; s++) FILES[s].forEach(id => PAGES.push({ id, sec: s, num: n++ }));
+const pad = x => String(x).padStart(2, '0');
+const enc = p => p.split('/').map(encodeURIComponent).join('/');
+const srcOf = (sec, id) => BASE + enc(`Section${sec}/${id}.png`);
+const tocSrc = id => BASE + enc(`table of contents/${id}.png`);
+
+/* ===== 이미지 보호 ===== */
+['contextmenu','dragstart','selectstart','copy'].forEach(ev =>
+  document.addEventListener(ev, e => { if (!e.target.closest('input, .glass a')) e.preventDefault(); }));
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if ((e.metaKey || e.ctrlKey) && ['s','p','u'].includes(k)) e.preventDefault();
+});
+
+/* ===== 순서: 모든 페이지 + 데모 영상 (같은 프레임 안에서 넘김) ===== */
+const SEQ = [];
+PAGES.forEach((p, i) => {
+  SEQ.push({ kind: 'img', id: p.id, sec: p.sec, num: p.num, src: srcOf(p.sec, p.id), label: `${p.id} · p.${pad(p.num)}` });
+});
+const TSEQ = TOC.map((id, i) => ({ kind: 'img', id, src: tocSrc(id), label: `Contents ${i + 1}` }));
+const seqOf = st => st.view === 'toc' ? TSEQ : SEQ;
+
+/* ===== 히스토리 (이전/다음 = 바로 직전/직후 화면) ===== */
+let hist = [{ view: 'home' }], idx = 0;
+const $ = id => document.getElementById(id);
+const stage = $('stage'), topEl = $('top');
+
+function go(state){ hist = hist.slice(0, idx + 1); hist.push(state); idx++; render(); }
+$('backBtn').onclick = () => { if (idx > 0) { idx--; render(); } };
+$('fwdBtn').onclick  = () => { if (idx < hist.length - 1) { idx++; render(); } };
+$('homeBtn').onclick = () => { if (hist[idx].view !== 'home') go({ view: 'home' }); };
+$('tocBtn').onclick  = () => { if (hist[idx].view !== 'toc') go({ view: 'toc', pos: 0 }); };
+
+/* ===== 페이지 입력 ===== */
+$('search').addEventListener('submit', () => {
+  const input = $('pageInput'), v = parseInt(input.value, 10);
+  const pos = SEQ.findIndex(x => x.num === v);
+  if (pos < 0) { const f = $('search'); f.classList.remove('err'); void f.offsetWidth; f.classList.add('err'); return; }
+  input.value = ''; input.blur();
+  go({ view: 'section', pos });
+});
+
+/* ===== 해설 ===== */
+function noteOf(id){
+  let d = (window.NOTES || {})[id];
+  if (!d) return null;
+  if (Array.isArray(d)) d = { text: d };
+  const text = (d.text || []).filter(t => t && t.trim());
+  const links = (d.links || []).filter(l => l && l.url);
+  return (text.length || links.length) ? { text, links } : null;
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function pageEl(item){
+  const fig = document.createElement('figure');
+  fig.className = 'page slide';
+  fig.dataset.id = item.id;
+  const isFilm = item.id === FILM_PAGE;
+  const note = isFilm ? null : noteOf(item.id);
+  fig.innerHTML = `<img src="${item.src}" alt="${esc(item.label)}" draggable="false">
+    <div class="shield"></div>
+    <div class="missing-msg">이미지를 찾을 수 없어요<br>${esc(decodeURIComponent(item.src))}</div>`;
+  const img = fig.querySelector('img');
+  img.onerror = () => fig.classList.add('missing');
+  if (isFilm) attachFilm(fig);
+  if (note) {
+    fig.classList.add('has-note');
+    fig._tip = `<div class="ref">${esc(item.label)}</div>
+      ${note.text.map(t => `<p>${esc(t)}</p>`).join('')}
+      ${note.links.length ? `<ul>${note.links.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a></li>`).join('')}</ul>` : ''}`;
+  }
+  return fig;
+}
+
+function attachFilm(fig){
+  const b = FILM_BOX;
+  const box = document.createElement('div');
+  box.className = 'film-screen';
+  box.style.cssText = `left:${b.left}%;top:${b.top}%;width:${b.width}%;height:${b.height}%`;
+  box.innerHTML = `<video playsinline preload="metadata"
+      controlslist="nodownload noplaybackrate" disablepictureinpicture disableremoteplayback>
+      ${FILM_VIDEO.map(s => `<source src="${s}"${s.endsWith('.mp4') ? ' type="video/mp4"' : ''}>`).join('')}
+    </video>
+    <div class="film-err">이 브라우저에서 재생할 수 없는 영상 형식이에요.<br>demo.mp4 (H.264)로 변환해 assets 폴더에 넣어 주세요.</div>`;
+  fig.appendChild(box);
+  /* 골드 프레임을 영상 위에 겹침 (모서리 장식이 영상 가장자리를 덮도록) */
+  const g = GOLD_BOX, gold = document.createElement('img');
+  gold.className = 'film-gold'; gold.src = GOLD; gold.alt = ''; gold.draggable = false;
+  gold.style.cssText = `left:${g.left}%;top:${g.top}%;width:${g.width}%;height:${g.height}%`;
+  gold.onerror = () => gold.remove();
+  fig.appendChild(gold);
+
+  /* 영상 조작: 골드 모서리에 가리지 않도록 가운데 재생 버튼 + 모서리 사이 진행 바 */
+  const ui = document.createElement('div');
+  ui.className = 'film-ui';
+  ui.style.cssText = box.style.cssText;
+  ui.innerHTML = `<button class="film-play" aria-label="재생">
+      <svg width="34" height="34" viewBox="0 0 24 24"><path class="i-play" d="M8 5.5v13l11-6.5z" fill="#fff"/><g class="i-pause" fill="#fff"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></g></svg></button>
+    <div class="film-bar"><div class="film-track"><i></i></div>
+      <span class="film-time">0:00</span>
+      <button class="film-full" aria-label="전체 화면"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>`;
+  fig.appendChild(ui);
+  const v = box.querySelector('video'), fill = ui.querySelector('.film-track i'), track = ui.querySelector('.film-track');
+  const fmt = s => isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '0:00';
+  const toggle = () => v.paused ? v.play().catch(() => {}) : v.pause();
+  ui.querySelector('.film-play').onclick = toggle;
+  ui.addEventListener('click', e => { if (e.target === ui) toggle(); });
+  v.addEventListener('play',  () => ui.classList.add('playing'));
+  v.addEventListener('pause', () => ui.classList.remove('playing'));
+  v.addEventListener('ended', () => ui.classList.remove('playing'));
+  v.addEventListener('timeupdate', () => {
+    fill.style.width = (v.duration ? v.currentTime / v.duration * 100 : 0) + '%';
+    ui.querySelector('.film-time').textContent = `${fmt(v.currentTime)} / ${fmt(v.duration)}`;
+  });
+  v.addEventListener('loadedmetadata', () => { ui.querySelector('.film-time').textContent = `0:00 / ${fmt(v.duration)}`; });
+  track.addEventListener('click', e => {
+    const r = track.getBoundingClientRect();
+    if (v.duration) v.currentTime = (e.clientX - r.left) / r.width * v.duration;
+  });
+  ui.querySelector('.film-full').onclick = () => (v.requestFullscreen || v.webkitEnterFullscreen || (() => {})).call(v);
+  const srcs = box.querySelectorAll('source');
+  srcs[srcs.length - 1].addEventListener('error', () => fig.classList.add('film-bad'));
+
+}
+
+function logoHTML(){
+  return `<img class="logo" src="${LOGO}" alt="This is Gallery" onerror="this.outerHTML='<b class=&quot;logo-text&quot;>This is Gallery</b>'">`;
+}
+function barHTML(title){
+  return `<div class="bar">
+    <div class="brand">${logoHTML()}<small>Brand Foundation</small></div>
+    <div class="title">${title}</div>
+    <div class="credit">${CREDIT}</div></div>`;
+}
+
+/* ===== 렌더 ===== */
+let currentView = '', shownPos = -1, barTitle = '';
+
+function render(){
+  const st = hist[idx];
+  document.body.dataset.view = st.view === 'home' ? 'home' : 'doc';
+  $('backBtn').disabled = idx === 0;
+  $('fwdBtn').disabled = idx === hist.length - 1;
+  $('tocBtn').setAttribute('aria-pressed', st.view === 'toc');
+
+  if (st.view !== currentView) {
+    currentView = st.view; shownPos = -1; barTitle = '';
+    stage.innerHTML = '';
+    if (st.view === 'home') { setZoom(false); zoomBtn.disabled = true; stage.className = 'stage home'; renderHome(); $('pageInput').placeholder = 'Enter the page'; return; }
+    zoomBtn.disabled = false;
+    stage.className = 'stage doc';
+    stage.innerHTML = `
+      <button class="turn prev" aria-label="이전 페이지"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4 7 12l8 8"/></svg></button>
+      <div class="viewport" id="viewport"></div>
+      <button class="turn next" aria-label="다음 페이지"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg></button>`;
+    stage.querySelector('.prev').onclick = () => turn(-1);
+    stage.querySelector('.next').onclick = () => turn(1);
+    bindSwipe($('viewport'));
+  }
+  if (st.view !== 'home') showSlide(st.pos || 0);
+}
+
+function showSlide(pos){
+  const st = hist[idx], seq = seqOf(st), item = seq[pos];
+  if (!item || pos === shownPos) return;
+  const dir = shownPos < 0 ? 0 : (pos > shownPos ? 1 : -1);
+  shownPos = pos; st.pos = pos;
+
+  /* 상단 바: 섹션 이름 */
+  const title = st.view === 'toc' ? 'Table of Contents' : `Section ${item.sec}<span>${SECTION_NAMES[item.sec - 1]}</span>`;
+  if (title !== barTitle) { barTitle = title; topEl.innerHTML = barHTML(title); }
+
+  hideTip();
+  const vp = $('viewport');
+  vp.querySelectorAll('.slide').forEach(old => {
+    old.querySelectorAll('video').forEach(m => m.pause());
+    if (!dir) return old.remove();
+    old.classList.add(dir > 0 ? 'to-l' : 'to-r');
+    setTimeout(() => old.remove(), 520);
+  });
+  const el = pageEl(item);
+  if (dir) el.classList.add(dir > 0 ? 'from-r' : 'from-l');
+  vp.appendChild(el);
+  if (dir) requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('from-r', 'from-l')));
+
+  stage.querySelector('.prev').disabled = pos === 0;
+  stage.querySelector('.next').disabled = pos === seq.length - 1;
+  $('pageInput').placeholder = item.num ? `p.${pad(item.num)} / ${PAGES.length}` : item.label;
+
+  /* 앞뒤 이미지 미리 불러오기 */
+  [pos - 1, pos + 1, pos + 2].forEach(i => { const s = seq[i]; if (s && s.src) new Image().src = s.src; });
+}
+
+function turn(d){
+  const st = hist[idx];
+  if (st.view === 'home') return;
+  const np = (st.pos || 0) + d;
+  if (np >= 0 && np < seqOf(st).length) showSlide(np);
+}
+
+/* 키보드 ← →, 마우스 휠, 스와이프로 넘기기 */
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input, video')) return;
+  if (['ArrowRight','ArrowDown','PageDown'].includes(e.key)) { e.preventDefault(); turn(1); }
+  if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); turn(-1); }
+});
+let wheelLock = 0;
+stage.addEventListener('wheel', e => {
+  e.preventDefault();                                  /* 휠로 화면이 움직이지 않게 */
+  if (zoomOn) {
+    zoomLevel = Math.min(5, Math.max(1.5, zoomLevel + (e.deltaY < 0 ? 0.25 : -0.25)));
+    if (lastPt) lensAt(lastPt[0], lastPt[1]);
+  }
+}, { passive: false });
+function bindSwipe(el){
+  let x0 = null;
+  el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    if (x0 === null || zoomOn) return;
+    const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 40) turn(dx < 0 ? 1 : -1);
+  });
+}
+
+function renderHome(){
+  topEl.innerHTML = `<div class="banner">
+    <img class="cat" src="${BASE}main/cat.png" alt="" onerror="this.remove()">
+    <div class="txt">
+      <h1>Click to jump to your desired section.</h1>
+      <p>This document sets out the story, strategy and identity behind This is Gallery, and serves as the foundation for building the brand.<br>${CREDIT}</p>
+    </div>
+    <div class="right">
+      <div class="brand">${logoHTML()}<small>Brand Foundation</small></div>
+      <img class="hen" src="${BASE}main/rooster.png" alt="" onerror="this.remove()">
+    </div></div>`;
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  for (let s = 1; s <= 6; s++) {
+    const b = document.createElement('button');
+    b.className = 'card';
+    b.setAttribute('aria-label', `Section ${s}. ${SECTION_NAMES[s-1]}`);
+    b.innerHTML = `<img src="${srcOf(s, s + '-cover')}" alt="" draggable="false">
+      <span class="fallback">This is Gallery — Section ${s}. ${SECTION_NAMES[s-1]}</span>`;
+    b.querySelector('img').onerror = () => b.classList.add('missing');
+    b.onclick = () => go({ view: 'section', pos: SEQ.findIndex(x => x.sec === s) });
+    grid.appendChild(b);
+  }
+  stage.appendChild(grid);
+}
+
+
+
+/* ===== 영역별 해설: 문장·표 칸 위에 올리면 그 부분만 작게 ===== */
+let tipFor = null;
+function tipEl(){
+  let tip = stage.querySelector('.tip');
+  if (!tip) {
+    tip = document.createElement('div'); tip.className = 'tip';
+    const hl = document.createElement('div'); hl.className = 'hl';
+    stage.appendChild(hl); stage.appendChild(tip);
+  }
+  return tip;
+}
+function hideTip(){
+  const tip = stage.querySelector('.tip'), hl = stage.querySelector('.hl');
+  if (tip) tip.classList.remove('on'); if (hl) hl.classList.remove('on');
+  tipFor = null; stage.style.cursor = '';
+}
+function currentSlide(){
+  const vp = $('viewport'); if (!vp) return null;
+  return [...vp.querySelectorAll('.slide')].find(s => !s.classList.contains('to-l') && !s.classList.contains('to-r'));
+}
+function regionAt(page, clientX, clientY){
+  const regs = (window.REGIONS || {})[page.dataset.id]; if (!regs) return null;
+  const r = page.getBoundingClientRect();
+  const px = (clientX - r.left) / r.width * 100, py = (clientY - r.top) / r.height * 100;
+  let best = null, area = Infinity, pad = 0.35;
+  for (const g of regs) {
+    if (px >= g[0] - pad && px <= g[0] + g[2] + pad && py >= g[1] - pad && py <= g[1] + g[3] + pad) {
+      const a = g[2] * g[3]; if (a < area) { area = a; best = g; }
+    }
+  }
+  return best;
+}
+function updateTip(clientX, clientY, target){
+  if (zoomOn || hist[idx].view === 'home') return hideTip();
+  const page = currentSlide();
+  if (!page || !page.contains(target) || target.closest('.film-ui, .film-screen')) return hideTip();
+  const g = regionAt(page, clientX, clientY);
+  if (!g) return hideTip();
+  const tip = tipEl(), hl = stage.querySelector('.hl');
+  const sr = stage.getBoundingClientRect(), k = stage.offsetWidth / sr.width;
+  const pr = page.getBoundingClientRect();
+  const ox = (pr.left - sr.left) * k, oy = (pr.top - sr.top) * k, pw = pr.width * k, ph = pr.height * k;
+  if (tipFor !== g) {
+    tipFor = g;
+    tip.textContent = g[4];
+    tip.classList.toggle('link', !!g[5]);
+    hl.style.cssText = `left:${ox + g[0] / 100 * pw - 4}px;top:${oy + g[1] / 100 * ph - 3}px;width:${g[2] / 100 * pw + 8}px;height:${g[3] / 100 * ph + 6}px`;
+  }
+  hl.classList.add('on');
+  stage.style.cursor = g[5] ? 'pointer' : '';
+  const x = (clientX - sr.left) * k, y = (clientY - sr.top) * k;
+  const W = stage.offsetWidth, H = stage.offsetHeight, w = tip.offsetWidth, h = tip.offsetHeight, gap = 16;
+  let left = x + gap, top = y + gap;
+  if (left + w > W - 6) left = x - gap - w;
+  if (top + h > H - 6) top = y - gap - h;
+  tip.style.transform = `translate(${Math.max(6, left)}px, ${Math.max(6, top)}px)`;
+  tip.classList.add('on');
+}
+stage.addEventListener('mousemove', e => updateTip(e.clientX, e.clientY, e.target));
+stage.addEventListener('mouseleave', hideTip);
+stage.addEventListener('click', e => {
+  if (zoomOn || hist[idx].view === 'home') return;
+  const page = currentSlide(); if (!page || !page.contains(e.target)) return;
+  const g = regionAt(page, e.clientX, e.clientY);
+  if (g && g[5]) { window.open(g[5], '_blank', 'noopener'); return; }
+  if (matchMedia('(hover: none)').matches) updateTip(e.clientX, e.clientY, e.target);   /* 터치: 탭한 곳 해설 */
+});
+
+/* ===== 돋보기: 동그란 렌즈로 확대 (휠로 배율 조절, Esc로 끄기) ===== */
+let zoomOn = false, zoomLevel = 2.5;
+const zoomBtn = $('zoomBtn');
+function setZoom(on){
+  zoomOn = on && hist[idx].view !== 'home';
+  zoomBtn.setAttribute('aria-pressed', zoomOn);
+  document.body.classList.toggle('zoom-on', zoomOn);
+  if (zoomOn) hideTip();
+  const l = document.querySelector('.lens'); if (l && !zoomOn) l.classList.remove('on');
+}
+zoomBtn.onclick = () => setZoom(!zoomOn);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setZoom(false); });
+
+function lensAt(clientX, clientY){
+  const vp = $('viewport'); if (!vp) return;
+  const page = [...vp.querySelectorAll('.slide')].find(s => !s.classList.contains('to-l') && !s.classList.contains('to-r'));
+  let lens = vp.querySelector('.lens');
+  if (!lens) { lens = document.createElement('div'); lens.className = 'lens'; lens.innerHTML = '<span></span>'; vp.appendChild(lens); }
+  const img = page && page.querySelector('img');
+  const r = vp.getBoundingClientRect();
+  const k = vp.offsetWidth / r.width;                 /* 16:9 프레임 축소 비율 보정 */
+  const x = (clientX - r.left) * k, y = (clientY - r.top) * k;
+  const W = vp.offsetWidth, H = vp.offsetHeight;
+  const overVideo = document.elementFromPoint(clientX, clientY)?.closest('.film-ui');
+  if (!zoomOn || !img || x < 0 || y < 0 || x > W || y > H || overVideo) { lens.classList.remove('on'); return; }
+  const R = lens.offsetWidth / 2;
+  lens.style.left = x + 'px'; lens.style.top = y + 'px';
+  lens.style.backgroundImage = `url("${img.currentSrc || img.src}")`;
+  lens.style.backgroundSize = `${W * zoomLevel}px ${H * zoomLevel}px`;
+  lens.style.backgroundPosition = `${R - x * zoomLevel}px ${R - y * zoomLevel}px`;
+  lens.querySelector('span').textContent = `×${zoomLevel.toFixed(1)}`;
+  lens.classList.add('on');
+}
+let lastPt = null;
+stage.addEventListener('mousemove', e => { lastPt = [e.clientX, e.clientY]; lensAt(e.clientX, e.clientY); });
+stage.addEventListener('mouseleave', () => { const l = document.querySelector('.lens'); if (l) l.classList.remove('on'); });
+stage.addEventListener('touchmove', e => {
+  if (!zoomOn) return;
+  e.preventDefault(); const t0 = e.touches[0]; lastPt = [t0.clientX, t0.clientY]; lensAt(t0.clientX, t0.clientY);
+}, { passive: false });
+stage.addEventListener('touchend', () => { const l = document.querySelector('.lens'); if (l) l.classList.remove('on'); });
+
+/* 16:9 프레임을 창 크기에 맞춤 */
+function fit(){
+  const s = Math.min(innerWidth / 1600, innerHeight / 900);
+  $('frame').style.setProperty('--s', s);
+}
+addEventListener('resize', fit); fit();
+
+render();
+</script>
+</body>
+</html>
