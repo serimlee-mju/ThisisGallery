@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>This is Gallery</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+    html, body {
+      width: 100%;
+      background: #fff;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;   /* 아이폰 가로 전환 시 글자 자동 확대 방지 */
+      text-size-adjust: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    }
+
+    /* 화면 전체 — 가운데 정렬 */
+    .page {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      height: var(--app-h, 100dvh);     /* 화면 전환 시 JS가 실제 높이로 즉시 갱신 */
+      display: flex;
+      flex-direction: column;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    /* 크레딧을 뺀 나머지 공간 — 여기 안에서만 무대가 커짐 */
+    .stage-area {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      container-type: size;
+    }
+
+    /* 16:9 무대 — 화면 크기에 맞춰 비율 유지하며 늘었다 줄었다 */
+    .stage {
+      width: min(100cqw, 100cqh * 16 / 9);
+      aspect-ratio: 16 / 9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      container-type: inline-size;
+    }
+
+    /* 로고 + 부제 묶음 */
+    .title {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35cqw;            /* 로고와 부제 사이 간격 */
+      width: 100%;
+      margin-bottom: 1.6cqw;   /* 제목 묶음과 영상 사이 간격 */
+    }
+
+    .logo {
+      width: 18cqw;
+      height: auto;
+      display: block;
+    }
+
+    .subtitle {
+      font-size: max(9px, 0.85cqw);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: #000;
+      white-space: nowrap;
+    }
+
+    .video-wrap {
+      width: 66cqw;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      box-shadow: 0 1.2cqw 3cqw rgba(0, 0, 0, 0.12);
+    }
+
+    .video-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 가운데 재생 버튼 */
+    .video-wrap { position: relative; }
+    .play-btn {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: clamp(52px, 7cqw, 88px);
+      height: clamp(52px, 7cqw, 88px);
+      border: none;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .play-btn:hover { transform: scale(1.06); background: rgba(0, 0, 0, 0.75); }
+    .play-btn svg { width: 38%; height: 38%; margin-left: 8%; fill: #fff; }
+    .play-btn[hidden] { display: none; }
+
+    /* 오른쪽 하단 크레딧 */
+    .credit {
+      flex-shrink: 0;
+      align-self: flex-end;
+      padding: 0 clamp(14px, 2.2vw, 36px) clamp(10px, 1.8vw, 28px);
+      font-size: clamp(9px, 0.75vw, 12px);
+      color: #888;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+    .credit b { font-weight: inherit; white-space: nowrap; }
+    .credit .sep { margin: 0 0.6em; color: #ccc; }
+    .credit a { color: inherit; text-decoration: none; }
+    .credit a:hover { color: #000; }
+
+
+    /* 영상 아래 'AI 활용 보고서' 버튼 */
+    .report-link {
+      margin-top: 1.4cqw;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5em;
+      font-size: max(11px, 0.9cqw);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: #000;
+      text-decoration: none;
+      padding: 0.55em 1.3em;
+      border: 1px solid rgba(0, 0, 0, 0.8);
+      border-radius: 999px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .report-link:hover { background: #000; color: #fff; }
+
+    /* ── AI 활용 보고서 ── */
+    .report {
+      width: var(--video-w, min(66vw, 1100px));
+      max-width: calc(100vw - 40px);
+      margin: 0 auto;
+      padding: clamp(64px, 9vw, 128px) 0 56px;
+      color: #111;
+      word-break: keep-all;
+    }
+    .report h2 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #111;
+    }
+    /* 사진과 글: 넓은 화면에서는 나란히, 같은 높이 축 */
+    .report-intro {
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: clamp(24px, 3.5vw, 48px);
+      align-items: center;
+    }
+    .report-intro:not(:has(figure)) { grid-template-columns: 1fr; }   /* 사진이 없을 때 글이 전체 폭 사용 */
+    .report figure { margin: 0; }
+    .report figure img { width: 100%; height: auto; display: block; }
+    .report-intro p:last-child { margin-bottom: 0; }
+    .report p, .report td { text-wrap: pretty; }   /* 마지막 줄에 한 단어만 남지 않게 */
+    .nb { white-space: nowrap; }
+    .report .lead {
+      font-size: clamp(17px, 1.7vw, 20px);
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .report p {
+      font-size: 15px;
+      line-height: 1.85;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    .report table {
+      width: 100%;
+      margin-top: clamp(40px, 5vw, 64px);
+      border-collapse: collapse;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .report th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #555;
+      background: #f5f5f5;
+      padding: 12px;
+    }
+    .report td {
+      padding: 16px 12px;
+      border-top: 1px solid #e6e6e6;
+      vertical-align: top;
+      color: #222;
+    }
+    .report td:first-child { font-weight: 600; white-space: nowrap; }
+    .report .tool { color: #888; }
+    .report .back {
+      display: block;
+      margin-top: 48px;
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      text-decoration: none;
+    }
+    .report .back:hover { color: #000; }
+
+    /* 좁은 화면: 표를 단계별 카드로 */
+    @media (max-width: 720px) {
+      .report { width: calc(100vw - 40px); }
+      .report-intro { grid-template-columns: 1fr; }
+      .report table, .report tbody, .report tr, .report td { display: block; width: 100%; }
+      .report thead { display: none; }
+      .report tr { border-top: 1px solid #ddd; padding: 18px 0 6px; }
+      .report td { border: none; padding: 4px 0 10px; }
+      .report td:first-child { font-size: 16px; padding-bottom: 8px; white-space: normal; }
+      .report td:not(:first-child)::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #999;
+        margin-bottom: 2px;
+      }
+    }
+
+    /* 크레딧: 페이지 맨 아래 가운데 */
+    .report ~ .credit {
+      display: block;
+      text-align: center;
+      white-space: normal;
+      line-height: 1.8;
+      padding: 8px 20px 40px;
+    }
+
+    /* ── 세로 화면 안내 ── */
+    .rotate-notice {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: #111;
+      color: #fff;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .rotate-notice .phone {
+      width: 44px;
+      height: 76px;
+      border: 3px solid #fff;
+      border-radius: 9px;
+      position: relative;
+      animation: rotate 2s ease-in-out infinite;
+    }
+    .rotate-notice .phone::after {
+      content: "";
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      width: 10px;
+      height: 3px;
+      background: #fff;
+      border-radius: 2px;
+      transform: translateX(-50%);
+    }
+
+    @keyframes rotate {
+      0%, 20%   { transform: rotate(0deg); }
+      50%, 80%  { transform: rotate(-90deg); }
+      100%      { transform: rotate(0deg); }
+    }
+
+    .rotate-notice p {
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+    .rotate-notice small {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 400;
+      opacity: 0.6;
+    }
+
+    .rotate-notice button {
+      margin-top: 8px;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.4);
+      color: #fff;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    /* 터치 기기 + 세로일 때만 안내 표시 */
+    @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
+      .rotate-notice { display: flex; }
+      body.dismissed .rotate-notice { display: none; }
+
+      /* '세로로 그냥 보기' — 유튜브처럼 영상이 가로폭을 꽉 채움 */
+      body.dismissed .stage {
+        width: 100%;
+        aspect-ratio: auto;
+      }
+      body.dismissed .title { margin-bottom: 22px; gap: 6px; }
+      body.dismissed .logo { width: 46vw; }
+      body.dismissed .subtitle { font-size: 12px; }
+      body.dismissed .video-wrap {
+        width: 100vw;
+        box-shadow: none;
+      }
+      body.dismissed .play-btn { width: 60px; height: 60px; }
+      body.dismissed .report-link { margin-top: 20px; font-size: 13px; }
+      body.dismissed .credit {
+        align-self: center;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.8;
+        padding: 0 20px 24px;
+        font-size: 10px;
+      }
+      body.dismissed .credit .sep.first { display: block; height: 0; overflow: hidden; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="page" id="top">
+    <div class="stage-area">
+    <div class="stage">
+      <header class="title">
+        <img class="logo" src="This%20is%20Gallery.svg" alt="This is Gallery" />
+        <p class="subtitle">Storyboard-based Demo Video</p>
+      </header>
+      <div class="video-wrap">
+        <video playsinline preload="metadata">
+          <source src="demo.mp4#t=0.1" type="video/mp4" />
+          영상을 재생할 수 없는 브라우저입니다.
+        </video>
+        <button class="play-btn" type="button" aria-label="영상 재생">
+          <svg viewBox="0 0 24 24"><path d="M6 4l15 8-15 8z"/></svg>
+        </button>
+      </div>
+      <a class="report-link" href="#report">AI 활용 보고서 <span aria-hidden="true">↓</span></a>
+    </div>
+    </div>
+  </main>
+
+  <section class="report" id="report">
+    <h2>AI 활용 보고서</h2>
+    <div class="report-intro">
+      <figure>
+        <img src="ai-light.jpg" alt="빛을 들고 있는 강아지" onerror="this.closest('figure').remove()" />
+      </figure>
+      <div>
+        <p class="lead">강아지가 들고 있는 빛은 클로드입니다.</p>
+        <p>브랜드 설정 문서를 처음부터 읽고 응답해 설정을 잘 기억했고,<br />작가가 짠 흐름을 검토하고 검증하는 데 탁월해 설계와 구현의 <span class="nb">파트너로 선택했습니다.</span></p>
+        <p>다만 개별 작업은 빠르게 처리해도, 브랜드의 세계관과 전체 일관성은 아직 <span class="nb">사람의 판단이 필요합니다.</span></p>
+        <p>작가가 먼저 점검하고 클로드가 한 번 더 검증하는 교차 점검으로 협업했으며, 설계와 판단은 작가가, <span class="nb">구현과 연결은 AI가 맡았습니다.</span></p>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>단계</th><th>AI가 한 것</th><th>부족했던 점</th><th>작가가 한 것</th></tr>
+      </thead>
+      <tbody>
+          <tr>
+            <td>기획 · 브랜드 설정</td>
+            <td data-label="AI가 한 것">브랜드 설정 문서를 처음부터 읽고, 작가가 짠 기획 흐름이 설정과 어긋나지 않는지 검토 의견 제시. 출처 검증 보조 <span class="tool">(Claude)</span>. 사용해 본 다른 AI에 비해 설정을 잘 기억함</td>
+            <td data-label="부족했던 점">완벽하지는 않아, 앞 단계에서 정한 내용을 모두 정확히 이어 가지는 못함</td>
+            <td data-label="작가가 한 것">리서치, 설문 설계와 분석, 브랜드 설정, 이야기 구성, 기획 흐름 정리. 검토 의견을 판단해 반영하고 출처 본문을 직접 확인</td>
+          </tr>
+          <tr>
+            <td>캐릭터</td>
+            <td data-label="AI가 한 것">손그림 기반 디자인을 턴어라운드로 전개 <span class="tool">(Runway)</span></td>
+            <td data-label="부족했던 점">선, 비례, 눈높이, 꼬리 위치, 수탉의 볏 등 세부가 원래 디자인과 어긋남</td>
+            <td data-label="작가가 한 것">손그림 → 종이 질감 → Photoshop, Illustrator로 다듬기 → 턴어라운드 생성 후 Photoshop에서 선, 비례, 눈높이, 꼬리 위치, 볏 등 전면 재조정</td>
+          </tr>
+          <tr>
+            <td>도구 비교</td>
+            <td data-label="AI가 한 것">턴어라운드와 이미지 생성 시험 <span class="tool">(GPT)</span></td>
+            <td data-label="부족했던 점">턴어라운드 전개가 부정확하고 결과 편차가 커 일관성 유지가 어려움</td>
+            <td data-label="작가가 한 것">비교 후 Runway 채택</td>
+          </tr>
+          <tr>
+            <td>데모 필름</td>
+            <td data-label="AI가 한 것">장면 설명 정리 <span class="tool">(Claude)</span>, 컷 영상화와 연결 <span class="tool">(Runway)</span></td>
+            <td data-label="부족했던 점">배경을 포함하면 캐릭터와 배경을 함께 인식하는 데 어려움을 겪음. 당나귀 기준으로 키 비례를 지정해도 생성할 때마다 네 동물의 키가 달라짐</td>
+            <td data-label="작가가 한 것">스토리보드 21컷 구성, 레퍼런스 동작과 턴어라운드 준비, 컷 선별. 신별 캐릭터와 더 작은 컷 단위로 보완 예정</td>
+          </tr>
+          <tr>
+            <td>웹 구현</td>
+            <td data-label="AI가 한 것">Figma와 연결해 설계된 화면을 직접 읽고 코드로 구현. 코드 구조에 대한 이해도가 높음 <span class="tool">(Claude)</span></td>
+            <td data-label="부족했던 점">개별 작업은 빠르게 처리하나, 브랜드 세계관과 전체 일관성까지 스스로 유지하지는 못함</td>
+            <td data-label="작가가 한 것">Figma에서 정보 구조, 흐름, 화면 설계. 세계관과 일관성을 먼저 점검하고, 클로드가 한 번 더 검증하는 교차 점검으로 수정</td>
+          </tr>
+      </tbody>
+    </table>
+    <a class="back" href="#top">↑ 영상으로 돌아가기</a>
+  </section>
+
+  <footer class="credit">
+      <b>명지대학교 디지털콘텐츠디자인학과</b><span class="sep first">|</span><b>60161576</b><span class="sep">|</span><b>이세림</b><span class="sep">|</span><b><a href="mailto:serim@mju.ac.kr">serim@mju.ac.kr</a></b>
+    </footer>
+
+
+  <div class="rotate-notice" role="dialog" aria-label="화면 회전 안내">
+    <div class="phone"></div>
+    <p>화면을 가로로 돌려주세요
+      <small>가로 화면에서 더 잘 보여요</small>
+    </p>
+    <button type="button" onclick="document.body.classList.add('dismissed')">세로로 그냥 보기</button>
+  </div>
+
+  <script>
+    // 세로↔가로 전환 시 화면 높이를 바로바로 다시 계산
+    function setAppHeight() {
+      const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty('--app-h', h + 'px');
+      const vw = document.querySelector('.video-wrap');
+      if (vw) document.documentElement.style.setProperty('--video-w', vw.getBoundingClientRect().width + 'px');
+    }
+    function refreshLayout() {
+      setAppHeight();
+      // 일부 브라우저는 회전 직후 크기가 늦게 바뀌어서 몇 번 더 확인
+      [50, 150, 300, 600].forEach(t => setTimeout(setAppHeight, t));
+    }
+    setAppHeight();
+    window.addEventListener('load', setAppHeight);
+    window.addEventListener('resize', refreshLayout);
+    window.addEventListener('orientationchange', refreshLayout);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', setAppHeight);
+    if (screen.orientation) screen.orientation.addEventListener('change', refreshLayout);
+
+    const video = document.querySelector('.video-wrap video');
+    const playBtn = document.querySelector('.play-btn');
+    const isTouch = matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const isLandscape = () => matchMedia('(orientation: landscape)').matches;
+    const isFull = () => document.fullscreenElement || document.webkitFullscreenElement || video.webkitDisplayingFullscreen;
+
+    // 모바일 가로 화면이면 전체화면으로
+    function goFullscreen() {
+      if (!isTouch || !isLandscape() || isFull()) return;
+      try {
+        if (video.requestFullscreen) {
+          video.requestFullscreen().then(() => {
+            if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+          }).catch(() => {});
+        } else if (video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen();   // 아이폰
+        }
+      } catch (e) {}
+    }
+
+    // 가운데 재생 버튼
+    playBtn.addEventListener('click', () => {
+      playBtn.hidden = true;
+      video.controls = true;
+      video.play();
+      goFullscreen();
+    });
+
+    // 재생 컨트롤로 다시 재생할 때도 가로면 전체화면
+    video.addEventListener('play', () => {
+      playBtn.hidden = true;
+      video.controls = true;
+      goFullscreen();
+    });
+  </script>
+</body>
+</html>
