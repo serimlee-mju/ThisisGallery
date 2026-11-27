@@ -434,3 +434,5 @@ html, body {
   }
   body.dismissed .credit .sep.first { display: block; height: 0; overflow: hidden; }
 }
+
+.report .next { color: #C8114E; }
