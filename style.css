@@ -1,0 +1,439 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+html, body {
+  width: 100%;
+  background: #fff;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;   /* 아이폰 가로 전환 시 글자 자동 확대 방지 */
+  text-size-adjust: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+/* 화면 전체 — 가운데 정렬 */
+.page {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  height: var(--app-h, 100dvh);     /* 화면 전환 시 JS가 실제 높이로 즉시 갱신 */
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 크레딧을 뺀 나머지 공간 — 여기 안에서만 무대가 커짐 */
+.stage-area {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+/* 16:9 무대 — 화면 크기에 맞춰 비율 유지하며 늘었다 줄었다 */
+.stage {
+  width: min(100cqw, 100cqh * 16 / 9);
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  container-type: inline-size;
+}
+
+/* 로고 + 부제 묶음 */
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35cqw;            /* 로고와 부제 사이 간격 */
+  width: 100%;
+  margin-bottom: 1.6cqw;   /* 제목 묶음과 영상 사이 간격 */
+}
+
+.logo {
+  width: 18cqw;
+  height: auto;
+  display: block;
+}
+
+.subtitle {
+  font-size: max(9px, 0.85cqw);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #000;
+  white-space: nowrap;
+}
+
+.video-wrap {
+  width: 66cqw;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  box-shadow: 0 1.2cqw 3cqw rgba(0, 0, 0, 0.12);
+}
+
+.video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 가운데 재생 버튼 */
+.video-wrap { position: relative; }
+.play-btn {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: clamp(52px, 7cqw, 88px);
+  height: clamp(52px, 7cqw, 88px);
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background 0.2s;
+}
+.play-btn:hover { transform: scale(1.06); background: rgba(0, 0, 0, 0.75); }
+.play-btn svg { width: 38%; height: 38%; margin-left: 8%; fill: #fff; }
+.play-btn[hidden] { display: none; }
+
+/* 오른쪽 하단 크레딧 */
+.credit {
+  flex-shrink: 0;
+  align-self: flex-end;
+  padding: 0 clamp(14px, 2.2vw, 36px) clamp(10px, 1.8vw, 28px);
+  font-size: clamp(9px, 0.75vw, 12px);
+  color: #888;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.credit b { font-weight: inherit; white-space: nowrap; }
+.credit .sep { margin: 0 0.6em; color: #ccc; }
+.credit a { color: inherit; text-decoration: none; }
+.credit a:hover { color: #000; }
+
+
+/* 영상 아래 'AI 활용 보고서' 버튼 */
+.report-link {
+  margin-top: 1.4cqw;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: max(11px, 0.9cqw);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #000;
+  text-decoration: none;
+  padding: 0.55em 1.3em;
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 999px;
+  transition: background 0.2s, color 0.2s;
+}
+.report-link:hover { background: #000; color: #fff; }
+
+/* ── AI 활용 보고서 ── */
+.report {
+  container-type: inline-size;
+  width: max(var(--video-w, min(66vw, 1100px)), min(calc(100vw - 40px), 760px));
+  max-width: calc(100vw - 40px);
+  margin: 0 auto;
+  padding: clamp(64px, 9vw, 128px) 0 56px;
+  color: #111;
+  word-break: keep-all;
+}
+.report h2 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #888;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #111;
+}
+/* 사진과 글: 넓은 화면에서는 나란히, 같은 높이 축 */
+.report-intro {
+  display: grid;
+  grid-template-columns: 1fr fit-content(62%);   /* 글은 줄바꿈 없이 필요한 폭만, 남은 폭은 모두 사진에 */
+  gap: 4cqw;
+  align-items: stretch;
+}
+/* 사진이 글 묶음 높이를 꽉 채우도록 — 비율이 조금 달라도 위아래 끝이 글과 맞음 */
+.report-intro figure { display: flex; }
+.report-intro figure img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+/* 글 묶음의 첫 줄 위와 마지막 줄 아래를 사진의 위아래 끝에 맞춤 */
+.report-intro > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.report-intro .lead {
+  font-size: clamp(16px, 2cqw, 26px);
+  line-height: 1.2;
+  margin: -0.1em 0 0;
+}
+.report-intro p:not(.lead) {
+  font-size: clamp(13px, 1.42cqw, 19px);
+  line-height: 1.65;
+  margin: 0;
+}
+.report-intro p:last-child { margin-bottom: -0.35em; }
+.report-intro:not(:has(figure)) { grid-template-columns: 1fr; }   /* 사진이 없을 때 글이 전체 폭 사용 */
+.report figure { margin: 0; }
+.report figure img { width: 100%; height: auto; display: block; }
+.report-intro p:last-child { margin-bottom: 0; }
+.report p, .report td { text-wrap: pretty; }   /* 마지막 줄에 한 단어만 남지 않게 */
+.nb { white-space: nowrap; }
+.report .lead {
+  font-size: clamp(17px, 1.7vw, 20px);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.report p {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #333;
+  margin-bottom: 12px;
+}
+.report table {
+  width: 100%;
+  margin-top: clamp(40px, 5vw, 64px);
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.report th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #555;
+  background: #f5f5f5;
+  padding: 12px;
+}
+.report td {
+  padding: 16px 12px;
+  border-top: 1px solid #e6e6e6;
+  vertical-align: top;
+  color: #222;
+}
+.report td:first-child { font-weight: 600; white-space: nowrap; }
+.report th + th, .report td + td { border-left: 1px solid #e6e6e6; padding-left: 16px; }
+.report td + td { padding-right: 16px; }
+.report tbody tr:last-child td { border-bottom: 1px solid #e6e6e6; }
+.report .tool { color: #888; }
+.report .back {
+  display: block;
+  margin-top: 48px;
+  text-align: center;
+  font-size: 13px;
+  color: #888;
+  text-decoration: none;
+}
+.report .back:hover { color: #000; }
+
+/* 좁은 화면: 표를 단계별 카드로 */
+@media (max-width: 720px) {
+  .report { width: calc(100vw - 40px); }
+}
+/* 보고서 폭이 좁으면(휴대폰 세로·가로, 작은 창) 사진과 글을 위아래로, 표는 카드로 */
+@container (max-width: 800px) {
+  .report-intro { grid-template-columns: 1fr; }
+  .report-intro figure img { height: auto; }
+  .report-intro > div { justify-content: flex-start; gap: 12px; }
+  .report-intro .lead { font-size: 19px; margin-bottom: 4px; }
+  .report-intro p:not(.lead) { font-size: 15px; line-height: 1.8; }
+  .report-intro p:last-child { margin-bottom: 0; }
+  .report table, .report tbody, .report tr, .report td { display: block; width: 100%; }
+  .report thead { display: none; }
+  .report tr { border-top: 1px solid #ddd; padding: 18px 0 6px; }
+  .report td { border: none; padding: 4px 0 10px; }
+  .report td + td { border-left: none; padding-left: 0; padding-right: 0; }
+  .report tbody tr:last-child td { border-bottom: none; }
+  .report td:first-child { font-size: 16px; padding-bottom: 8px; white-space: normal; }
+  .report td:not(:first-child)::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    margin-bottom: 2px;
+  }
+}
+
+
+/* 턴어라운드 보기 버튼 */
+.turn-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: #000;
+  border: none;
+  padding: 0.8em 1.4em;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.turn-btn:hover { background: #333; }
+
+/* 턴어라운드 팝업 */
+.turn-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.96);
+  padding: 20px;
+}
+.turn-modal.open { display: flex; }
+.turn-box {
+  width: min(100vw - 160px, 1500px, (100dvh - 140px) * 2400 / 1186);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+/* 네 장 모두 같은 크기 틀 안에 겹쳐 두고 보이는 것만 바꿈 — 넘겨도 흔들리지 않음 */
+.turn-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2400 / 1186;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.turn-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.turn-frame img.on { opacity: 1; }
+.turn-tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.turn-tabs button {
+  font: inherit;
+  font-size: 13px;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  padding: 0.5em 1.2em;
+  cursor: pointer;
+  min-width: 76px;
+}
+.turn-tabs button.on { background: #fff; color: #000; border-color: #fff; }
+.turn-nav, .turn-close {
+  position: absolute;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.turn-nav:hover, .turn-close:hover { background: rgba(255, 255, 255, 0.25); }
+.turn-nav { top: 50%; transform: translateY(-50%); }
+.turn-prev { left: 16px; }
+.turn-next { right: 16px; }
+.turn-close { top: 16px; right: 16px; }
+@media (max-width: 720px) {
+  .turn-box { width: min(100vw - 24px, (100dvh - 140px) * 2400 / 1186); }
+  .turn-nav { display: none; }   /* 휴대폰은 밀어서 넘기기 + 탭 */
+}
+
+/* 맺음말 */
+.closing {
+  margin-top: clamp(56px, 7vw, 96px);
+  padding-top: 40px;
+  border-top: 1px solid #111;
+  text-align: center;
+}
+.closing p { font-size: 16px; line-height: 1.5; color: #222; margin: 0; }
+.value-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-top: 22px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: #000;
+  text-decoration: none;
+  padding: 0.8em 1.5em;
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+.value-link:hover { background: #333; }
+.closing .thanks { margin-top: 22px; font-weight: 600; color: #111; }
+
+/* 크레딧: 페이지 맨 아래 가운데 */
+.report ~ .credit {
+  display: block;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.8;
+  padding: 8px 20px 40px;
+}
+
+.rotate-hint {
+  display: none;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+}
+
+/* ── 세로 화면 안내 ── */
+
+/* 터치 기기 + 세로일 때만 안내 표시 */
+@media (orientation: portrait) and (hover: none) and (pointer: coarse) {
+
+  /* '세로로 그냥 보기' — 유튜브처럼 영상이 가로폭을 꽉 채움 */
+  body.dismissed .stage {
+    width: 100%;
+    aspect-ratio: auto;
+  }
+  body.dismissed .title { margin-bottom: 22px; gap: 6px; }
+  body.dismissed .logo { width: 46vw; }
+  body.dismissed .subtitle { font-size: 12px; }
+  body.dismissed .video-wrap {
+    width: 100vw;
+    box-shadow: none;
+  }
+  body.dismissed .play-btn { width: 60px; height: 60px; }
+  body.dismissed .report-link { margin-top: 18px; font-size: 13px; }
+  .rotate-hint { display: block; }
+  body.dismissed .credit {
+    align-self: center;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.8;
+    padding: 0 20px 24px;
+    font-size: 10px;
+  }
+  body.dismissed .credit .sep.first { display: block; height: 0; overflow: hidden; }
+}
+
+/* 앞으로 보완할 내용 — 브랜드 적색 */
+.report .next { color: #C8114E; }

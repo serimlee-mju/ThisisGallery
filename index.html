@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>This is Gallery</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dismissed">
+
+  <main class="page" id="top">
+    <div class="stage-area">
+    <div class="stage">
+      <header class="title">
+        <img class="logo" src="assets/This%20is%20Gallery.svg" alt="This is Gallery" />
+        <p class="subtitle">Storyboard-based Demo Video</p>
+      </header>
+      <div class="video-wrap">
+        <video playsinline preload="metadata">
+          <source src="demo.mp4#t=0.1" type="video/mp4" />
+          영상을 재생할 수 없는 브라우저입니다.
+        </video>
+        <button class="play-btn" type="button" aria-label="영상 재생">
+          <svg viewBox="0 0 24 24"><path d="M6 4l15 8-15 8z"/></svg>
+        </button>
+      </div>
+      <p class="rotate-hint">영상은 가로로 돌려 보시면 더 크게 볼 수 있어요</p>
+      <a class="report-link" href="#report">AI 활용 보고서 <span aria-hidden="true">↓</span></a>
+    </div>
+    </div>
+  </main>
+
+  <section class="report" id="report">
+    <h2>AI 활용 보고서</h2>
+    <div class="report-intro">
+      <figure>
+        <img src="assets/ai-light.jpg" alt="빛을 들고 있는 강아지" onerror="this.closest('figure').remove()" />
+      </figure>
+      <div>
+        <p class="lead">들고 있는 빛, 함께하는 클로드입니다.</p>
+       <p>AI는 지금 이 순간에도 발전하고 있습니다.<br />별처럼 쏟아지는 기술의 흐름 속에서,<br />한 가지 AI만 쓰겠다고 단언할 수 없게 되었습니다.</p>
+        <p>현재로서는,<br />브랜드 설정 문서를 처음부터 읽고 응답해 설정을 잘 기억하고,<br />설정한 흐름을 검토하고 검증하는 데 탁월한 클로드를<br />구현의 파트너로 선택했습니다.</p>
+        <p>다만 개별 작업은 빠르게 처리해도,<br />브랜드의 세계관과 전체 일관성은 아직 사람의 판단이 필요합니다.</p>
+        <p>작가가 먼저 점검하고 클로드가 한 번 더 검증하는 교차 점검으로 협업했으며,<br />설계와 판단은 작가가, <span class="nb">구현과 연결은 클로드가 맡았습니다.</span></p>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>단계</th><th>AI가 한 것</th><th>부족했던 점</th><th>작가가 한 것</th></tr>
+      </thead>
+      <tbody>
+          <tr>
+            <td>기획 · 브랜드 설정</td>
+            <td data-label="AI가 한 것">브랜드 설정 문서를 처음부터 읽고, 작가가 짠 기획 흐름이 설정과 어긋나지 않는지 검토 의견 제시.<br />출처 검증 보조 <span class="tool">(Claude)</span>.<br />사용해 본 다른 AI에 비해 설정을 잘 기억함</td>
+            <td data-label="부족했던 점">완벽하지는 않아, 앞 단계에서 정한 내용을 모두 정확히 이어 가지는 못함</td>
+            <td data-label="작가가 한 것">리서치, 설문 설계와 분석, 브랜드 설정, 이야기 구성, 기획 흐름 정리.<br />검토 의견을 판단해 반영하고 출처 본문을 직접 확인</td>
+          </tr>
+          <tr>
+            <td>캐릭터</td>
+            <td data-label="AI가 한 것">손그림 기반 디자인을 턴어라운드로 전개 <span class="tool">(Runway)</span></td>
+            <td data-label="부족했던 점">선, 비례, 눈높이, 꼬리 위치, 수탉의 볏 등 세부가 원래 디자인과 어긋남</td>
+            <td data-label="작가가 한 것">손그림 → 종이 질감 → Photoshop, Illustrator로 다듬기 → 턴어라운드 생성 후 Photoshop과 Illustrator에서 선, 비례, 눈높이, 꼬리 위치, 볏 등 전면 재조정<br /><button class="turn-btn" type="button">턴어라운드 보기</button></td>
+          </tr>
+          <tr>
+            <td>도구 비교</td>
+            <td data-label="AI가 한 것">턴어라운드와 이미지 생성 시험 <span class="tool">(GPT)</span></td>
+            <td data-label="부족했던 점">턴어라운드 전개가 부정확하고 결과 편차가 커 일관성 유지가 어려움</td>
+            <td data-label="작가가 한 것">비교 후 Runway 채택</td>
+          </tr>
+          <tr>
+            <td>데모 필름</td>
+            <td data-label="AI가 한 것">장면 설명 정리 <span class="tool">(Claude)</span>, 컷 영상화와 연결 <span class="tool">(Runway)</span></td>
+            <td data-label="부족했던 점">배경을 포함하면 캐릭터와 배경을 함께 인식하는 데 어려움을 겪음.<br />당나귀 기준으로 키 비례를 지정해도 생성할 때마다 네 동물의 키가 달라짐</td>
+            <td data-label="작가가 한 것">스토리보드 21컷 구성, 레퍼런스 동작과 턴어라운드 준비, 컷 선별.<br /><span class="next">신별 캐릭터와 더 작은 컷 단위로 보완 예정</span></td>
+          </tr>
+          <tr>
+            <td>웹 구현</td>
+            <td data-label="AI가 한 것">Figma와 연결해 설계된 화면을 직접 읽고 코드로 구현.<br />코드 구조에 대한 이해도가 높음 <span class="tool">(Claude)</span></td>
+            <td data-label="부족했던 점">개별 작업은 빠르게 처리하나, 브랜드 세계관과 전체 일관성까지 스스로 유지하지는 못함</td>
+            <td data-label="작가가 한 것">Figma에서 정보 구조, 흐름, 화면 설계.<br />세계관과 일관성을 먼저 점검하고, 클로드가 한 번 더 검증하는 교차 점검으로 수정</td>
+          </tr>
+      </tbody>
+    </table>
+    <div class="closing">
+      <p>디스이즈갤러리는 클로드가 핵심 가치로 두는<br />열린 마음과 정직함을 존중합니다.</p>
+      <a class="value-link" href="https://www.anthropic.com/constitution" target="_blank" rel="noopener">클로드의 핵심 가치 보기 <span aria-hidden="true">↗</span></a>
+      <p class="thanks">감사합니다.</p>
+    </div>
+  </section>
+
+  <footer class="credit">
+      <b>명지대학교 디지털콘텐츠디자인학과</b><span class="sep first">|</span><b>60161576</b><span class="sep">|</span><b>이세림</b><span class="sep">|</span><b><a href="mailto:serim@mju.ac.kr">serim@mju.ac.kr</a></b>
+    </footer>
+
+  <!-- 턴어라운드 팝업 -->
+  <div class="turn-modal" role="dialog" aria-modal="true" aria-label="캐릭터 턴어라운드">
+    <button class="turn-close" type="button" aria-label="닫기">✕</button>
+    <button class="turn-nav turn-prev" type="button" aria-label="이전">‹</button>
+    <div class="turn-box">
+      <div class="turn-frame">
+        <img class="on" src="assets/turnaround-donkey.jpg" alt="당나귀 턴어라운드" />
+        <img src="assets/turnaround-dog.jpg" alt="개 턴어라운드" />
+        <img src="assets/turnaround-cat.jpg" alt="고양이 턴어라운드" />
+        <img src="assets/turnaround-rooster.jpg" alt="수탉 턴어라운드" />
+      </div>
+      <div class="turn-tabs">
+        <button type="button" class="on">당나귀</button>
+        <button type="button">개</button>
+        <button type="button">고양이</button>
+        <button type="button">수탉</button>
+      </div>
+    </div>
+    <button class="turn-nav turn-next" type="button" aria-label="다음">›</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
